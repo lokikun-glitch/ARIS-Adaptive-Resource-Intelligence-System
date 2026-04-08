@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ARIS — Adaptive Resource Intelligence System
 
 A Flask-based engineering dashboard for visualising and comparing classic optimisation algorithms. Enter your data, run an algorithm, and get results, a chart, and step-by-step execution logs in one place.
@@ -51,3 +52,6 @@ Then open [http://localhost:5000](http://localhost:5000) in your browser.
 - Each algorithm panel has a **Random Input** button so you can try it immediately.
 - Enable **Show steps** to see the algorithm's decision log.
 - All results include execution time in milliseconds.
+=======
+# ARIS-Adaptive-Resource-Intelligence-System
+>>>>>>> d636c8509b690ece5ea310eeb6c7e96acfd34912

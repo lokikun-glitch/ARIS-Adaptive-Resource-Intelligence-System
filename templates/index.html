@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARIS — Adaptive Resource Intelligence System</title>
+  <meta name="description" content="Practical engineering dashboard implementing Fractional Knapsack, Activity Selection, Kruskal MST, and Graph Coloring algorithms." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Mobile sidebar toggle -->
+  <button class="hamburger" id="hamburger" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="logo-mark">AR</span>
+      <div class="logo-text">
+        <span class="logo-title">ARIS</span>
+        <span class="logo-sub">Resource Intelligence</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="nav">
+      <button class="nav-item active" data-panel="selector" id="nav-selector">
+        <span class="nav-icon">⌖</span>
+        <span>Algorithm Selector</span>
+      </button>
+      <button class="nav-item" data-panel="cargo" id="nav-cargo">
+        <span class="nav-icon">⊞</span>
+        <span>Cargo Optimization</span>
+      </button>
+      <button class="nav-item" data-panel="scheduling" id="nav-scheduling">
+        <span class="nav-icon">▦</span>
+        <span>Job Scheduling</span>
+      </button>
+      <button class="nav-item" data-panel="network" id="nav-network">
+        <span class="nav-icon">◈</span>
+        <span>Network Optimization</span>
+      </button>
+      <button class="nav-item" data-panel="conflict" id="nav-conflict">
+        <span class="nav-icon">◒</span>
+        <span>Conflict Resolution</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span>v1.0 &nbsp;·&nbsp; Flask</span>
+    </div>
+  </aside>
+
+  <!-- ── Main ───────────────────────────────────────────────────────── -->
+  <main class="main" id="main">
+
+    <!-- Algorithm Selector -->
+    <section class="panel active" id="panel-selector">
+      <div class="panel-header">
+        <h1>Algorithm Selector</h1>
+        <p class="panel-desc">Describe your problem in plain English — the system will identify the best algorithm.</p>
+      </div>
+      <div class="panel-meta">
+        <span class="badge badge-neutral">Rule-based matching</span>
+        <span class="badge badge-neutral">Keyword scoring</span>
+      </div>
+
+      <div class="form-group">
+        <label for="sel-input">Problem description</label>
+        <textarea id="sel-input" rows="4"
+          placeholder="e.g. I need to pack cargo items with different weights and profits into a truck with a weight limit."></textarea>
+      </div>
+      <button class="btn btn-primary" id="sel-run">Detect Algorithm</button>
+
+      <div class="output-block hidden" id="sel-output">
+        <div class="output-header">Recommendation</div>
+        <div class="output-body" id="sel-result"></div>
+      </div>
+    </section>
+
+    <!-- Cargo Optimization -->
+    <section class="panel" id="panel-cargo">
+      <div class="panel-header">
+        <h1>Cargo Optimization</h1>
+        <p class="panel-desc">Select items with highest profit/weight ratio under a capacity constraint.</p>
+      </div>
+      <div class="panel-meta">
+        <span class="badge badge-blue">Fractional Knapsack</span>
+        <span class="badge badge-neutral">Greedy</span>
+        <span class="badge badge-neutral">O(n log n)</span>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label for="cargo-items">Items <span class="hint">name, weight, profit — one per line</span></label>
+            <textarea id="cargo-items" rows="7">ItemA, 10, 60
+ItemB, 20, 100
+ItemC, 30, 120</textarea>
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label for="cargo-cap">Max capacity</label>
+            <input type="number" id="cargo-cap" value="50" min="0.1" step="1" />
+          </div>
+          <button class="btn btn-ghost" id="cargo-rand">&#x21bb; Random Input</button>
+        </div>
+      </div>
+
+      <div class="form-inline">
+        <label class="toggle-label">
+          <input type="checkbox" id="cargo-steps" />
+          <span>Show steps</span>
+        </label>
+        <button class="btn btn-primary" id="cargo-run">Run Knapsack</button>
+      </div>
+
+      <div class="output-block hidden" id="cargo-output">
+        <div class="output-header">Output</div>
+        <div class="output-body">
+          <pre id="cargo-result" class="code-output"></pre>
+        </div>
+      </div>
+      <div class="chart-wrap hidden" id="cargo-chart">
+        <img id="cargo-chart-img" alt="Cargo chart" />
+      </div>
+      <div class="steps-wrap hidden" id="cargo-steps-out">
+        <div class="output-header">Steps</div>
+        <pre class="code-output steps-code" id="cargo-steps-code"></pre>
+      </div>
+    </section>
+
+    <!-- Job Scheduling -->
+    <section class="panel" id="panel-scheduling">
+      <div class="panel-header">
+        <h1>Job Scheduling</h1>
+        <p class="panel-desc">Select the maximum number of non-overlapping jobs.</p>
+      </div>
+      <div class="panel-meta">
+        <span class="badge badge-blue">Activity Selection</span>
+        <span class="badge badge-neutral">Greedy</span>
+        <span class="badge badge-neutral">O(n log n)</span>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label for="sched-jobs">Jobs <span class="hint">name, start, end — one per line</span></label>
+            <textarea id="sched-jobs" rows="7">Job1, 1, 4
+Job2, 3, 5
+Job3, 0, 6
+Job4, 5, 7
+Job5, 3, 9
+Job6, 5, 9</textarea>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" id="sched-rand">&#x21bb; Random Input</button>
+        </div>
+      </div>
+
+      <div class="form-inline">
+        <label class="toggle-label">
+          <input type="checkbox" id="sched-steps" />
+          <span>Show steps</span>
+        </label>
+        <button class="btn btn-primary" id="sched-run">Run Scheduling</button>
+      </div>
+
+      <div class="output-block hidden" id="sched-output">
+        <div class="output-header">Output</div>
+        <div class="output-body">
+          <pre id="sched-result" class="code-output"></pre>
+        </div>
+      </div>
+      <div class="chart-wrap hidden" id="sched-chart">
+        <img id="sched-chart-img" alt="Schedule chart" />
+      </div>
+      <div class="steps-wrap hidden" id="sched-steps-out">
+        <div class="output-header">Steps</div>
+        <pre class="code-output steps-code" id="sched-steps-code"></pre>
+      </div>
+    </section>
+
+    <!-- Network Optimization -->
+    <section class="panel" id="panel-network">
+      <div class="panel-header">
+        <h1>Network Optimization</h1>
+        <p class="panel-desc">Connect all nodes with minimum total edge cost using Kruskal's algorithm.</p>
+      </div>
+      <div class="panel-meta">
+        <span class="badge badge-blue">Kruskal's MST</span>
+        <span class="badge badge-neutral">Graph</span>
+        <span class="badge badge-neutral">O(E log E)</span>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label for="net-graph">Graph <span class="hint">first line: nodes, then u,v,weight</span></label>
+            <textarea id="net-graph" rows="9">A,B,C,D,E
+A,B,4
+A,C,1
+B,C,2
+B,D,5
+C,D,3
+C,E,6
+D,E,7</textarea>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-ghost" id="net-rand">&#x21bb; Random Input</button>
+        </div>
+      </div>
+
+      <div class="form-inline">
+        <label class="toggle-label">
+          <input type="checkbox" id="net-steps" />
+          <span>Show steps</span>
+        </label>
+        <button class="btn btn-primary" id="net-run">Run MST</button>
+      </div>
+
+      <div class="output-block hidden" id="net-output">
+        <div class="output-header">Output</div>
+        <div class="output-body">
+          <pre id="net-result" class="code-output"></pre>
+        </div>
+      </div>
+      <div class="chart-wrap hidden" id="net-chart">
+        <img id="net-chart-img" alt="Network chart" />
+      </div>
+      <div class="steps-wrap hidden" id="net-steps-out">
+        <div class="output-header">Steps</div>
+        <pre class="code-output steps-code" id="net-steps-code"></pre>
+      </div>
+    </section>
+
+    <!-- Conflict Resolution -->
+    <section class="panel" id="panel-conflict">
+      <div class="panel-header">
+        <h1>Conflict Resolution</h1>
+        <p class="panel-desc">Assign resources so no two conflicting entities share the same resource.</p>
+      </div>
+      <div class="panel-meta">
+        <span class="badge badge-blue">Graph Coloring</span>
+        <span class="badge badge-neutral">Backtracking</span>
+        <span class="badge badge-neutral">O(m^n)</span>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="form-group">
+            <label for="conf-graph">Conflicts <span class="hint">first line: nodes, then u,v edges</span></label>
+            <textarea id="conf-graph" rows="9">T1,T2,T3,T4,T5
+T1,T2
+T1,T3
+T2,T4
+T3,T4
+T3,T5
+T4,T5</textarea>
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label for="conf-colors">Max colors</label>
+            <input type="number" id="conf-colors" value="4" min="1" step="1" />
+          </div>
+          <button class="btn btn-ghost" id="conf-rand">&#x21bb; Random Input</button>
+        </div>
+      </div>
+
+      <div class="form-inline">
+        <label class="toggle-label">
+          <input type="checkbox" id="conf-steps" />
+          <span>Show steps</span>
+        </label>
+        <button class="btn btn-primary" id="conf-run">Run Coloring</button>
+      </div>
+
+      <div class="output-block hidden" id="conf-output">
+        <div class="output-header">Output</div>
+        <div class="output-body">
+          <pre id="conf-result" class="code-output"></pre>
+        </div>
+      </div>
+      <div class="chart-wrap hidden" id="conf-chart">
+        <img id="conf-chart-img" alt="Conflict chart" />
+      </div>
+      <div class="steps-wrap hidden" id="conf-steps-out">
+        <div class="output-header">Steps</div>
+        <pre class="code-output steps-code" id="conf-steps-code"></pre>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
